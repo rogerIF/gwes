@@ -1,9 +1,8 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
 
-// Factor syntax highlight - simple mode
-//
-// by Dimage Sapelkin (https://github.com/kerabromsmu)
+// gwes syntax highlight - simple mode
+
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -15,25 +14,31 @@
 })(function(CodeMirror) {
   "use strict";
 
-  CodeMirror.defineSimpleMode("factor", {
+  CodeMirror.defineSimpleMode("gwes", {
     // The start state contains the rules that are intially used
     start: [
       // 关键字
-      {regex: /\b(?:and|or|not|xor|to)\b/i,token: "keyword"},
+      {regex: /\b(?:and|or|not|xor|to|pre)\b/i,token: "keyword"},
       //操作符
       {regex: /[=<>!]+/, token: "number"},
       {regex: /[%#?]+/, token: "atom"},
-      {regex: /\(/, token:"vocabulary",indent: true},
-      {regex: /\)/, token:"vocabulary" ,dedent: true},
+
+      //中文括号，当错误提示
+      {regex: /（+/, token: "error"},
+      {regex: /）+/, token: "error"},
+      //英文括号，不缩进
+      {regex: /\(/, token:"bracket"/*, indent: true*/},
+      {regex: /\)/, token:"bracket"/*, dedent: true*/},
       //字符串
-      { regex: /'(?:[^\\']|\\.)*'?/, token: "string" },
-
-      { regex: /'(?:[^\\']|\\.)*'?/, token: "string" },
-
+      // { regex: /'(?:[^\\']|\\.)*'?/, token: "string" },
+      { regex: /'(?:[^\\']|\\.)*?/, token: "string",next:"string" },
 
 
     ],
-
+    string: [
+      {regex: /(?:[^\\]|\\.)*?'/, token: "string", next: "start"},
+      {regex: /.*/, token: "string"}
+    ],
 
     // The meta property contains global information about the mode. It
     // can contain properties like lineComment, which are supported by
@@ -41,11 +46,9 @@
     // specific to simple modes.
     meta: {
       //模式的自动缩进不应生效的状态数组。通常用于多行注释和字符串状态。
-      dontIndentStates: ["start", "vocabulary", "string", "string3", "stack"],
-      //行注释
-      //lineComment: [ "!", "#!" ]
+      //dontIndentStates: ["start", "vocabulary", "string", "string3", "stack"],
     }
   });
 
-  CodeMirror.defineMIME("text/x-factor", "factor");
+  CodeMirror.defineMIME("text/gwes", "gwes");
 });
